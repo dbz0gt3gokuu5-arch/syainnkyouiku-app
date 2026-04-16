@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Guide AI</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+            --bg-color: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bot-msg-bg: #ffffff;
+            --user-msg-bg: var(--primary-gradient);
+            --border-radius-lg: 24px;
+            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Blobs */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .shape1 {
+            width: 500px;
+            height: 500px;
+            background: #bfdbfe;
+            /* Light Blue */
+            top: -100px;
+            left: -100px;
+            border-radius: 50%;
+        }
+
+        .shape2 {
+            width: 400px;
+            height: 400px;
+            background: #bbf7d0;
+            /* Light Green for Excel */
+            bottom: -50px;
+            right: 10%;
+            border-radius: 50%;
+            animation-delay: -5s;
+        }
+
+        .shape3 {
+            width: 300px;
+            height: 300px;
+            background: #ddd6fe;
+            /* Light Purple for accent */
+            top: 20%;
+            right: -50px;
+            border-radius: 50%;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) scale(1);
+            }
+
+            100% {
+                transform: translateY(30px) scale(1.1);
+            }
+        }
+
+        /* Main Layout */
+        .app-container {
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.4);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .quick-access h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .tag:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .shortcut-card {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .shortcut-icon {
+            width: 36px;
+            height: 36px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #eab308;
+            /* Yellow */
+        }
+
+        .shortcut-text h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .shortcut-text p {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        kbd {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .sidebar-footer {
+            padding-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Chat Main Area */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-header {
+            height: 80px;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .bot-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bot-avatar-header {
+            width: 44px;
+            height: 44px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .bot-info h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Chat Messages Area */
+        .chat-wrapper {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.bot .avatar {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .message.user .avatar {
+            background: #e2e8f0;
+            color: var(--text-muted);
+        }
+
+        .message-content {
+            padding: 1rem 1.2rem;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .message.bot .message-content {
+            background: var(--bot-msg-bg);
+            color: var(--text-main);
+            border-top-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background: var(--user-msg-bg);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        /* Markdown typography inside bot messages */
+        .message.bot .message-content pre {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.8rem 0;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+        }
+
+        .message.bot .message-content code {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #e11d48;
+            font-weight: 600;
+        }
+
+        .message.bot .message-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+            font-weight: normal;
+        }
+
+        .message.bot .message-content p {
+            margin-bottom: 0.5rem;
+        }
+
+        .message.bot .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message.bot .message-content ul,
+        .message.bot .message-content ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Chat Input */
+        .chat-input-wrapper {
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .chat-form {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #chat-input {
+            width: 100%;
+            padding: 1.2rem 4rem 1.2rem 1.5rem;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            outline: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        #chat-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        #send-btn {
+            position: absolute;
+            right: 8px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #send-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        #send-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Typing Indicator Animation */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0.2rem;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+                height: 100vh;
+                width: 100%;
+                border-radius: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+            }
+
+            .quick-access,
+            .shortcut-card {
+                display: none;
+                /* Hide on very small screens to save space */
+            }
+
+            .chat-header {
+                height: 60px;
+                padding: 0 1rem;
+            }
+
+            .chat-wrapper {
+                padding: 1rem;
+            }
+
+            .chat-input-wrapper {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Animated Blobs -->
+    <div class="blob shape1"></div>
+    <div class="blob shape2"></div>
+    <div class="blob shape3"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <h1>Office Assist</h1>
+            </div>
+
+            <div class="sidebar-content">
+                <p class="description">
+                    お困りごとをチャットに入力すると、解決策や具体的な関数・手順をご案内します。
+                </p>
+
+                <div class="quick-access">
+                    <h3>💡 よくある質問</h3>
+                    <div class="tags" id="quick-tags">
+                        <button class="tag" data-query="合計を出したい">合計を出したい</button>
+                        <button class="tag" data-query="VLOOKUPの使い方">VLOOKUPとは？</button>
+                        <button class="tag" data-query="セル内で改行したい">セル内改行</button>
+                        <button class="tag" data-query="1ページに収めて印刷">1ページ印刷</button>
+                        <button class="tag" data-query="Wordで自動で目次を作りたい">自動目次(Word)</button>
+                        <button class="tag" data-query="今日の日付を入れるショートカット">今日の日付</button>
+                    </div>
+                </div>
+
+                <div class="shortcut-card">
+                    <div class="shortcut-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="shortcut-text">
+                        <h4>元に戻す</h4>
+                        <p><kbd>Ctrl</kbd> + <kbd>Z</kbd></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>&copy; 2026 Office Guide AI</p>
+            </div>
+        </aside>
+
+        <!-- Main Chat Interface -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div class="bot-info">
+                    <div class="bot-avatar-header"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h2>アシスタント AI</h2>
+                        <span class="status"><span class="status-dot"></span> オンライン</span>
+                    </div>
+                </div>
+                <button class="action-btn" id="clear-chat" title="チャットをクリア"><i
+                        class="fa-solid fa-trash-can"></i></button>
+            </header>
+
+            <div class="chat-wrapper">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Default Greeting -->
+                    <div class="message bot">
+                        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="message-content">
+                            <p>こんにちは！ExcelやWordの操作でわからないことはありますか？<br>例えば「<strong>表の合計を出したい</strong>」「<strong>1ページに収めて印刷したい</strong>」のように、やりたいことをそのまま話しかけてください！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-wrapper">
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="chat-input" placeholder="やりたいことをここに入力してください..." autocomplete="off">
+                    <button type="submit" id="send-btn" disabled>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Knowledge base for the Smart AI
+        const knowledgeBase = [
+            {
+                keywords: ['合計', '足し算', 'sum'],
+                response: `<p>💡 <strong>Excelで合計を出す方法ですね！</strong></p>
+<p>一番簡単な方法は <code>SUM</code>（サム）関数を使うことです。</p>
+<pre><code>=SUM(A1:A5)</code></pre>
+<ul>
+    <li>数式を入れたいセルを選択して、上記の関数を入力します。</li>
+    <li>また、ショートカット <code>Alt</code> + <code>=</code> を押すと、自動でSUM関数が入るのでとても便利です！</li>
+</ul>`
+            },
+            {
+                keywords: ['vlookup', '検索', '引っ張る', '別シート'],
+                response: `<p>💡 <strong>VLOOKUP関数の使い方ですね。</strong></p>
+<p>別の表からデータを検索して持ってくる時によく使います。</p>
+<pre><code>=VLOOKUP(検索値, 範囲, 列番号, FALSE)</code></pre>
+<ol>
+    <li><strong>検索値</strong>: 探したいデータ（例: 社員番号）</li>
+    <li><strong>範囲</strong>: データが入力されている表全体</li>
+    <li><strong>列番号</strong>: 範囲の中で、取り出したいデータが左から何列目にあるか</li>
+    <li><strong>FALSE</strong>: 完全一致で探すための設定（必須）</li>
+</ol>
+<p>エラーが出た場合は「検索範囲がズレていないか（絶対参照 <code>$</code> が付いているか）」を確認してみてください！</p>`
+            },
+            {
+                keywords: ['改行', 'セル', 'エクセル 改行'],
+                response: `<p>💡 <strong>Excelのセル内で改行する方法ですね。</strong></p>
+<p>以下のショートカットキーを使います：</p>
+<ul>
+    <li><kbd>Alt</kbd> + <kbd>Enter</kbd> （Windowsの場合）</li>
+</ul>
+<p>※WordのようにEnterキーだけを押すと、下のセルに移動してしまうので注意してください。</p>`
+            },
+            {
+                keywords: ['印刷', '1ページ', '収める', 'はみ出る'],
+                response: `<p>💡 <strong>Excelで1ページに収めて印刷する方法ですね。</strong></p>
+<ol>
+    <li>上部のメニュー（リボン）から「ページレイアウト」タブを開きます。</li>
+    <li>「ページ設定」グループの右下にある小さな矢印（ダイアログボックス起動ツール）をクリックします。</li>
+    <li>「ページ」タブの中の<strong>「次のページ数に合わせて印刷」</strong>を選択し、「横 1 × 縦 1」にします。</li>
+</ol>
+<p>これで文字や表が自動的に縮小されて、綺麗に1枚に収まります。</p>`
+            },
+            {
+                keywords: ['目次', '自動', 'ワード'],
+                response: `<p>💡 <strong>Wordで自動的に目次を作る方法ですね。</strong></p>
+<p>そのためには、まず見出しとなる文字に「スタイル」を設定する必要があります。</p>
+<ol>
+    <li>見出しにしたい文字を選択し、「ホーム」タブのスタイルから「見出し1」などを適用します。</li>
+    <li>目次を入れたい場所（最初のページなど）をクリックします。</li>
+    <li>「参考資料」タブを開き、左端の「目次」をクリックして、好きなデザインを選びます。</li>
+</ol>
+<p>※文章を後から追加した場合は、目次をクリックして「目次の更新」を押すだけでページ番号が直ります。</p>`
+            },
+            {
+                keywords: ['日付', '今日', 'ショートカット'],
+                response: `<p>💡 <strong>今日の日付や時刻をすぐに入力するショートカットです。</strong></p>
+<ul>
+    <li>今日の日付を入れる: <kbd>Ctrl</kbd> + <kbd>;</kbd>（セミコロン）</li>
+    <li>現在の時刻を入れる: <kbd>Ctrl</kbd> + <kbd>:</kbd>（コロン）</li>
+</ul>
+<p>議事録の作成時や、データの記録時によく使うショートカットです！</p>`
+            },
+            {
+                keywords: ['フリーズ', '動かない', '固まった', '強制終了'],
+                response: `<p>⚠️ <strong>アプリが固まってしまったのですね。</strong></p>
+<p>以下の手順でタスクマネージャーを開いて強制終了できます：</p>
+<ol>
+    <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd> を押します。</li>
+    <li>固まっているExcelまたはWordを右クリックします。</li>
+    <li>「タスクの終了」を選択します。</li>
+</ol>
+<p>※保存されていないデータは消えてしまう可能性があります。</p>`
+            }
+        ];
+
+        // Fallback response when no keywords match
+        const fallbackResponse = `
+<p>ごめんなさい、その質問についてはまだ勉強中です🤖</p>
+<p>「合計を出したい」「VLOOKUPの使い方」「1ページに印刷したい」などと聞いてみてください。</p>
+`;
+
+        // DOM Elements
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const sendBtn = document.getElementById('send-btn');
+        const quickTags = document.querySelectorAll('.tag');
+        const clearChatBtn = document.getElementById('clear-chat');
+
+        // Enable/Disable Send button based on input
+        chatInput.addEventListener('input', () => {
+            sendBtn.disabled = chatInput.value.trim() === '';
+        });
+
+        // Select tag action
+        quickTags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                const query = tag.getAttribute('data-query');
+                handleUserMessage(query);
+            });
+        });
+
+        // Form submission
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+                handleUserMessage(message);
+                chatInput.value = '';
+                sendBtn.disabled = true;
+            }
+        });
+
+        // Clear Chat Action
+        clearChatBtn.addEventListener('click', () => {
+            // Keep only the first welcome message
+            const welcomeMsg = chatMessages.firstElementChild;
+            chatMessages.innerHTML = '';
+            if (welcomeMsg) {
+                chatMessages.appendChild(welcomeMsg);
+            }
+        });
+
+        function handleUserMessage(message) {
+            // 1. Add user message to UI
+            appendMessage('user', message);
+
+            // 2. Show typing indicator
+            showTypingIndicator();
+
+            // 3. Search knowledge base and reply after a small delay
+            setTimeout(() => {
+                removeTypingIndicator();
+                const responseHTML = getBotResponse(message);
+                appendMessage('bot', responseHTML, true);
+            }, 1000 + Math.random() * 500); // 1-1.5s delay
+        }
+
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+
+            // Simple keyword matching rule
+            for (const item of knowledgeBase) {
+                if (item.keywords.some(kw => lowerMessage.includes(kw.toLowerCase()))) {
+                    return item.response;
+                }
+            }
+
+            return fallbackResponse;
+        }
+
+        function appendMessage(sender, content, isHTML = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+
+            let avatarInner = sender === 'bot' ? '<i class="fa-solid fa-robot"></i>' : '<i class="fa-solid fa-user"></i>';
+
+            let textContent = '';
+            if (isHTML) {
+                textContent = content; // Trusted HTML from our knowledgeBase
+            } else {
+                // Escape HTML for user input to prevent XSS
+                const tempDiv = document.createElement('div');
+                tempDiv.textContent = content;
+                textContent = tempDiv.innerHTML;
+            }
+
+            msgDiv.innerHTML = `
+        <div class="avatar">${avatarInner}</div>
+        <div class="message-content">${textContent}</div>
+    `;
+
+            chatMessages.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        const typingIndicatorID = 'typing-indicator-node';
+
+        function showTypingIndicator() {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message bot';
+            msgDiv.id = typingIndicatorID;
+
+            msgDiv.innerHTML = `
+        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="message-content">
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    `;
+
+            chatMessages.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById(typingIndicatorID);
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function scrollToBottom() {
+            const wrapper = document.querySelector('.chat-wrapper');
+            wrapper.scrollTop = wrapper.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
